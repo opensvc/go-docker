@@ -2,9 +2,13 @@ package image
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	"github.com/cpuguy83/go-docker/transport"
+)
+
+var (
+	ErrImageNotExist = errors.New("image does not exist")
 )
 
 // Image provides bindings for interacting with a image in Docker
@@ -29,7 +33,6 @@ type NewOption func(*NewConfig)
 // If the image does not exist in Docker, all calls on the Image will fail.
 //
 // To actually create a image you must call `Pull` or `Import` first (which will return a image object to you).
-//
 func (s *Service) NewImage(_ context.Context, id string, opts ...NewOption) *Image {
 	var cfg NewConfig
 	for _, o := range opts {
@@ -44,7 +47,7 @@ func (s *Service) FindImage(ctx context.Context, name string) (*Image, error) {
 		return nil, err
 	}
 	if len(l) == 0 {
-		return nil, fmt.Errorf("image not found")
+		return nil, ErrImageNotFound
 	}
 	return &Image{id: l[0].ID, tr: s.tr}, nil
 }
